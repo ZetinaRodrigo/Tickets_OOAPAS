@@ -144,7 +144,7 @@ if DEBUG:
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = 'zetinacervantes7@gmail.com'
-    EMAIL_HOST_PASSWORD = 'towntwgqjeznqwip'  # NO tu contraseña personal
+    EMAIL_HOST_PASSWORD = 'xxxxxxxxxx'  # NO tu contraseña personal
     DEFAULT_FROM_EMAIL = 'zetinacervantes7@gmail.com'
     # Configuraciones específicas para desarrollo
     import logging
