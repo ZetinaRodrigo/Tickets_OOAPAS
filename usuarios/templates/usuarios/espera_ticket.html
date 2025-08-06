@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}Motivo de Espera{% else %}Poner Ticket en Espera{% endif %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido con todos los templates) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico de espera-ticket -->
+    <link rel="stylesheet" href="{% static 'css/espera-ticket.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            {% if es_admin %}
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <a href="{% url 'dashboard' %}" class="back-btn">
+                    <i class="bi bi-arrow-left me-2"></i>
+                </a>
+                {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}Motivo de Espera{% else %}Poner Ticket en Espera{% endif %}
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="form-container">
+                {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}
+                <!-- Vista del motivo de espera (solo lectura) -->
+                <h2 class="form-header">
+                    <i class="bi bi-pause-circle"></i> Motivo de Espera
+                </h2>
+                
+                <div class="form-body">
+                    <!-- Información del Ticket -->
+                    <div class="info-card">
+                        <h5>Información del Ticket:</h5>
+                        <div class="info-row">
+                            <span class="info-label">Título:</span>
+                            <span class="info-value">{{ ticket.titulo }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Descripción:</span>
+                            <span class="info-value">{{ ticket.descripcion }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de creación:</span>
+                            <span class="info-value">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Estatus:</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ ticket.estatus }}">{{ ticket.get_estatus_display }}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Información del motivo de espera -->
+                    <div class="espera-card">
+                        <div class="espera-header">
+                            <i class="bi bi-info-circle"></i> Detalles del Motivo de Espera
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="info-row">
+                                    <span class="info-label">Puesto en espera por:</span>
+                                    <span class="info-value">{{ ticket.motivo_espera.creado_por.nombre }} {{ ticket.motivo_espera.creado_por.apellido }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-row">
+                                    <span class="info-label">Fecha:</span>
+                                    <span class="info-value">{{ ticket.motivo_espera.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <p class="info-label">Motivo:</p>
+                            <div class="motivo-box">
+                                {{ ticket.motivo_espera.motivo|linebreaksbr }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-start">
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- Formulario para poner en espera -->
+                <h2 class="form-header">
+                    <i class="bi bi-pause-circle"></i> Poner Ticket en Espera
+                </h2>
+                
+                <div class="form-body">
+                    <!-- Información del Ticket -->
+                    <div class="info-card">
+                        <h5>Información del Ticket:</h5>
+                        <div class="info-row">
+                            <span class="info-label">Título:</span>
+                            <span class="info-value">{{ ticket.titulo }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Descripción:</span>
+                            <span class="info-value">{{ ticket.descripcion }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Creado por:</span>
+                            <span class="info-value">{{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha de creación:</span>
+                            <span class="info-value">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Estatus actual:</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ ticket.estatus }}">{{ ticket.get_estatus_display }}</span>
+                            </span>
+                        </div>
+                        {% if ticket.asignado_a %}
+                        <div class="info-row">
+                            <span class="info-label">Asignado a:</span>
+                            <span class="info-value">{{ ticket.asignado_a.nombre }} {{ ticket.asignado_a.apellido }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Advertencia -->
+                    <div class="warning-card">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Importante:</h6>
+                        <p class="mb-0">Al poner este ticket en espera, el usuario creador podrá ver el motivo especificado. Asegúrese de proporcionar una explicación clara y detallada.</p>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="motivo" class="form-label">
+                                Motivo para poner en espera<span class="required-asterisk">*</span>
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="motivo" 
+                                name="motivo" 
+                                rows="5" 
+                                placeholder="Explique detalladamente por qué este ticket se pondrá en espera..."
+                                required
+                                maxlength="1000"
+                            >{% if ticket.motivo_espera %}{{ ticket.motivo_espera.motivo }}{% endif %}</textarea>
+                            <div class="form-text">
+                                Proporcione una explicación clara del motivo. Esta información será visible para el usuario que creó el ticket.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-pause-circle me-2"></i> Poner en Espera
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript específico -->
+    <script src="{% static 'js/espera-ticket.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+/* ==============================================
+   ELIMINAR_USUARIO.CSS - Solo estilos específicos
+   Depende de: base.css
+   ============================================== */
+
+/* Content Area específico para este template */
+.content-area {
+    max-width: 800px;
+}
+
+/* Delete Container - Específico para eliminar */
+.delete-container {
+    background: white;
+    border-radius: 15px;
+    padding: 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.delete-header {
+    background: #dc3545;
+    color: white;
+    padding: 25px 30px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.delete-header i {
+    margin-right: 10px;
+}
+
+.delete-body {
+    padding: 30px;
+}
+
+/* Warning Card - Específico para eliminar */
+.warning-card {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.warning-card h4 {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.warning-card h4 i {
+    margin-right: 10px;
+    font-size: 24px;
+}
+
+/* User Info Card - Específico para eliminar */
+.user-info-card {
+    background: rgba(220, 53, 69, 0.05);
+    border: 2px solid #dc3545;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.user-info-header {
+    background: #dc3545;
+    color: white;
+    padding: 15px 20px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.user-info-header i {
+    margin-right: 10px;
+}
+
+/* User Details - Layout específico para mostrar usuario */
+.user-details {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-avatar-large {
+    width: 60px;
+    height: 60px;
+    background: rgba(220, 53, 69, 0.1);
+    border: 2px solid #dc3545;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #dc3545;
+    margin-right: 20px;
+    font-size: 24px;
+}
+
+/* Rol Badges - Específico para eliminar */
+.rol-badge {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rol-admin { 
+    background: #dc3545; 
+    color: white; 
+}
+
+.rol-sistemas { 
+    background: var(--color-azul-claro); 
+    color: white; 
+}
+
+.rol-usuario { 
+    background: var(--color-azul-oscuro); 
+    color: white; 
+}
+
+/* Danger Notice */
+.danger-notice {
+    background: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    color: #721c24;
+    font-weight: 600;
+}

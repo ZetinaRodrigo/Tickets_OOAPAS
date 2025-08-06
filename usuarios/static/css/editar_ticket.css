@@ -1,0 +1,63 @@
+/* ==============================================
+   EDITAR_TICKET.CSS - Solo estilos específicos
+   Depende de: base.css
+   ============================================== */
+
+/* Form Header - Color específico para editar (amarillo) */
+.form-header {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Content Area específico para este template */
+.content-area {
+    max-width: 1000px;
+}
+
+/* Images Section - Específico para editar ticket */
+.images-section {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.images-section h6 {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.images-section h6 i {
+    margin-right: 10px;
+}
+
+.image-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+}
+
+.image-card:hover {
+    border-color: var(--color-azul-claro);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(29, 184, 232, 0.2);
+}
+
+.image-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.image-card-body {
+    padding: 10px;
+    background: #f8f9fa;
+    text-align: center;
+}

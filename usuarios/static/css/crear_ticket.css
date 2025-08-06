@@ -1,0 +1,15 @@
+/* ==============================================
+   CREAR_TICKET.CSS - Solo estilos específicos
+   Depende de: base.css
+   ============================================== */
+
+/* Form Header - Color específico para crear (azul oscuro) */
+.form-header {
+    background: var(--color-azul-oscuro);
+    color: white;
+}
+
+/* Content Area específico para este template */
+.content-area {
+    max-width: 800px;
+}

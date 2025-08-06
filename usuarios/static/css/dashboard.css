@@ -1,0 +1,415 @@
+/* ==============================================
+   DASHBOARD.CSS - Solo estilos específicos del dashboard
+   Depende de: base.css
+   ============================================== */
+
+/* New Ticket Button - Específico del dashboard */
+.new-ticket-btn {
+    background: var(--color-azul-oscuro);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.new-ticket-btn:hover {
+    background: var(--color-azul-oscuro);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 90, 175, 0.3);
+}
+
+/* Content Area específico para dashboard */
+.content-area {
+    padding: 30px;
+    max-width: none;
+}
+
+/* Tabs Container - Específico del dashboard */
+.tabs-container {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* Custom Tabs - Sistema de pestañas del dashboard */
+.custom-tabs {
+    border: none;
+    background: #e9ecef;
+    padding: 4px;
+    display: flex;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 600px;
+}
+
+.custom-tab {
+    background: transparent;
+    border: none;
+    color: var(--color-gris-oscuro);
+    padding: 8px 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    flex: 1;
+    text-align: center;
+}
+
+.custom-tab.active {
+    background: var(--color-azul-oscuro);
+    color: white;
+}
+
+.custom-tab:hover:not(.active) {
+    background: rgba(46, 90, 175, 0.1);
+    color: var(--color-azul-oscuro);
+}
+
+/* Tab Content Area */
+.tab-content-area {
+    padding: 20px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Custom Table - Tablas específicas del dashboard */
+.custom-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: none;
+    border: none;
+}
+
+.custom-table thead th {
+    background: var(--color-gris-claro);
+    color: var(--color-azul-oscuro);
+    font-weight: 600;
+    border: none;
+    padding: 12px 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-table tbody td {
+    padding: 12px 10px;
+    border: none;
+    border-bottom: 1px solid #f1f1f1;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.custom-table tbody tr:hover {
+    background: rgba(29, 184, 232, 0.05);
+}
+
+/* Table Responsive - Fix para dropdowns */
+.table-responsive {
+    overflow: visible !important;
+}
+
+/* Urgency Badges - Niveles de urgencia */
+.urgency-badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.urgency-1 { 
+    background: white; 
+    color: #28a745; 
+    border: 2px solid #28a745; 
+}
+
+.urgency-2 { 
+    background: white; 
+    color: #ffc107; 
+    border: 2px solid #ffc107; 
+}
+
+.urgency-3 { 
+    background: white; 
+    color: #fd7e14; 
+    border: 2px solid #fd7e14; 
+}
+
+.urgency-4 { 
+    background: white; 
+    color: #dc3545; 
+    border: 2px solid #dc3545; 
+}
+
+/* Status Badges - Estados de tickets */
+.status-badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-generado { 
+    background: var(--color-azul-claro); 
+    color: white; 
+}
+
+.status-en_proceso { 
+    background: #ffc107; 
+    color: #212529; 
+}
+
+.status-en_espera { 
+    background: #fd7e14; 
+    color: white; 
+}
+
+.status-cancelado { 
+    background: #dc3545; 
+    color: white; 
+}
+
+.status-finalizado { 
+    background: var(--color-azul-oscuro); 
+    color: white; 
+}
+
+/* Assignment Badges - Estados de asignación */
+.assignment-asignado { 
+    background: #17a2b8; 
+    color: white; 
+}
+
+.assignment-aceptado { 
+    background: #28a745; 
+    color: white; 
+}
+
+/* Action Menu - Menús de acciones en tablas */
+.action-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--color-gris-oscuro);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: var(--color-gris-claro);
+    color: var(--color-azul-oscuro);
+}
+
+/* Dropdown Menus - Posicionamiento específico para cada sección */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding: 10px 0;
+    z-index: 9999 !important;
+    position: absolute !important;
+    transform: none !important;
+    min-width: 180px;
+    white-space: nowrap;
+    right: 0 !important;
+    left: auto !important;
+    top: 100% !important;
+    margin-top: 2px !important;
+}
+
+.dropdown-menu.show {
+    display: block !important;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: var(--color-azul-claro);
+    color: white;
+}
+
+/* Dropdown específico para "Todos los tickets" */
+.dropdown-menu-todos {
+    position: fixed !important;
+    z-index: 9999 !important;
+    min-width: 220px !important;
+    max-width: 250px !important;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 10px 0;
+    white-space: nowrap;
+    top: 35% !important;
+    right: 18% !important;
+    left: auto !important;
+    transform: none !important;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Dropdown para tickets asignados */
+.dropdown-menu-asignados {
+    position: absolute !important;
+    z-index: 9999 !important;
+    min-width: 180px !important;
+    max-width: 220px !important;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 10px 0;
+    white-space: nowrap;
+    max-height: 300px;
+    overflow-y: auto;
+    right: 100% !important;
+    left: auto !important;
+    top: 0 !important;
+    margin-right: 5px !important;
+}
+
+/* Dropdown para tickets disponibles */
+.dropdown-menu-disponibles {
+    position: absolute !important;
+    z-index: 9999 !important;
+    min-width: 200px !important;
+    max-width: 240px !important;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 10px 0;
+    white-space: nowrap;
+    max-height: 300px;
+    overflow-y: auto;
+    right: 100% !important;
+    left: auto !important;
+    top: 0 !important;
+    margin-right: 5px !important;
+}
+
+/* Dropdown para mis tickets */
+.dropdown-menu-mis-tickets {
+    position: absolute !important;
+    z-index: 9999 !important;
+    min-width: 180px !important;
+    max-width: 220px !important;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 5px 0 !important;
+    white-space: nowrap;
+    max-height: 90px !important;
+    overflow-y: auto;
+    right: 100% !important;
+    left: auto !important;
+    top: 0 !important;
+    margin-right: 5px !important;
+}
+
+.dropdown-menu-mis-tickets.show {
+    display: block !important;
+}
+
+.dropdown-menu-mis-tickets .dropdown-item {
+    padding: 6px 15px !important;
+}
+
+/* Estilos para Filtros - Sistema de filtros del dashboard */
+.filters-section .form-control:focus,
+.filters-section .form-select:focus {
+    border-color: var(--color-azul-oscuro);
+    box-shadow: 0 0 0 0.2rem rgba(46, 90, 175, 0.25);
+}
+
+.filter-tag {
+    background: var(--color-azul-claro);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.filter-tag .remove-filter {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 3px;
+}
+
+.filter-tag .remove-filter:hover {
+    opacity: 0.8;
+}
+
+.no-results-row {
+    background: #f8f9fa !important;
+}
+
+.no-results-row td {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--color-gris-oscuro);
+    font-style: italic;
+}
+
+/* Paginación Inteligente - Específico para filtros del dashboard */
+.filter-pagination-info {
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    margin-top: 10px;
+}
+
+.filter-pagination-info small {
+    font-weight: 500;
+}
+
+/* Animación suave para ocultar/mostrar paginación */
+nav[aria-label*="Paginación"] {
+    transition: all 0.3s ease;
+}
+
+/* Estilo especial para paginación de filtros */
+.pagination .page-item.disabled .page-link {
+    background: var(--color-azul-claro);
+    border-color: var(--color-azul-claro);
+    color: white;
+    font-size: 12px;
+}
+
+/* Indicador visual cuando los filtros están activos */
+.filters-section.has-active-filters {
+    background: #e3f2fd !important;
+    border-left: 4px solid var(--color-azul-oscuro);
+}

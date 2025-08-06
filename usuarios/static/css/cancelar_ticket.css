@@ -1,0 +1,108 @@
+/* ==============================================
+   CANCELAR_TICKET.CSS - Solo estilos específicos
+   Depende de: base.css
+   ============================================== */
+
+/* Form Header - Color específico para cancelación */
+.form-header.cancelado {
+    background: #dc3545;
+}
+
+.form-header.cancelar {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Warning Card - Específico para cancelar ticket */
+.warning-card {
+    background: rgba(255, 193, 7, 0.1);
+    border: none;
+    border-left: 4px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.warning-card h6 {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.warning-card h6 i {
+    margin-right: 8px;
+}
+
+/* Cancelación Card - Específico para mostrar info de cancelación */
+.cancelacion-card {
+    background: rgba(220, 53, 69, 0.05);
+    border: 2px solid #dc3545;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.cancelacion-header {
+    background: #dc3545;
+    color: white;
+    padding: 15px 20px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.cancelacion-header i {
+    margin-right: 10px;
+}
+
+.motivo-box {
+    background: #f8f9fa;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+/* Status Badges - Específico para estados de tickets */
+.status-badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-generado { 
+    background: var(--color-azul-claro); 
+    color: white; 
+}
+
+.status-en_proceso { 
+    background: #ffc107; 
+    color: #212529; 
+}
+
+.status-en_espera { 
+    background: #fd7e14; 
+    color: white; 
+}
+
+.status-cancelado { 
+    background: #dc3545; 
+    color: white; 
+}
+
+.status-finalizado { 
+    background: var(--color-azul-oscuro); 
+    color: white; 
+}
+
+/* Content Area específico para este template */
+.content-area {
+    max-width: 900px;
+}

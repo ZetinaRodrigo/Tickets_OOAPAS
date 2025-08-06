@@ -1,0 +1,322 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOAPAS - Autenticación</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+
+        .left-section {
+            width: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .right-section {
+            width: 50%;
+            background-image: url("{% static 'images/fondo.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-container {
+            background: transparent;
+            padding: 40px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .login-container h2 {
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+        }
+
+        .form-control:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+            background-color: white;
+        }
+
+        .btn-login {
+            background: #00bcd4;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background: #00acc1;
+            color: white;
+        }
+
+        .btn-crear {
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #666;
+            padding: 12px;
+            font-weight: 400;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-crear:hover {
+            background: #f8f9fa;
+            color: #666;
+            border-color: #00bcd4;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-image {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+        }
+
+        .alert {
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .form-select {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+        }
+
+        .form-select:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+            background-color: white;
+        }
+
+        #registro-form {
+            display: none;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn-volver:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .left-section, .right-section {
+                width: 100%;
+                min-height: 50vh;
+            }
+            
+            .left-section {
+                padding: 20px;
+            }
+            
+            .right-section {
+                padding: 20px;
+            }
+            
+            .logo-image {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Section - Login -->
+    <div class="left-section">
+        <!-- Login Form (Principal) -->
+        <div id="login-form" class="login-container">
+            <h2>Iniciar Sesión</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="login-email" class="form-control" placeholder="Usuario o Email" required>
+                <input type="password" name="contrasena" class="form-control" placeholder="Contraseña">
+                <button type="submit" class="btn btn-login">Iniciar Sesión</button>
+            </form>
+            
+            <button type="button" class="btn btn-crear" onclick="toggleForms()">Crear cuenta</button>
+        </div>
+
+        <!-- Registration Form (Oculto inicialmente) -->
+        <div id="registro-form" class="login-container">
+            <h2>Crear Usuario</h2>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+                <input type="text" name="apellido" class="form-control" placeholder="Apellido" required>
+                <input type="email" name="email" class="form-control" placeholder="Email" required>
+                <input type="password" name="contrasena" class="form-control" placeholder="Contraseña">
+                
+                <select name="rol" id="rol" class="form-select" required>
+                    <option value="usuario" selected>Usuario Normal</option>
+                    <option value="admin">Administrador</option>
+                    <option value="sistemas">Usuario de Sistemas</option>
+                </select>
+                
+                <div class="mb-3" id="admin-warning" style="display: none;">
+                    <div class="alert alert-warning">
+                        <strong>¡Atención!</strong> Un usuario administrador puede:
+                        <ul>
+                            <li>Crear, modificar y eliminar usuarios</li>
+                            <li>Gestionar tickets del sistema</li>
+                            <li>Configurar procesos críticos</li>
+                        </ul>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirm-admin" name="confirm-admin">
+                            <label class="form-check-label" for="confirm-admin">
+                                Acepto que estoy asignando permisos de administrador
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="sistemas-info" style="display: none;">
+                    <div class="alert alert-info">
+                        <strong>Información:</strong> La categoría del usuario de sistemas será asignada posteriormente por un administrador.
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-login">Crear usuario</button>
+            </form>
+            
+            <button type="button" class="btn btn-volver" onclick="toggleForms()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Right Section - Logo with Background -->
+    <div class="right-section">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS Logo" class="logo-image">
+        </div>
+    </div>
+
+    <script>
+    function toggleForms() {
+        const loginForm = document.getElementById('login-form');
+        const registroForm = document.getElementById('registro-form');
+        
+        if (loginForm.style.display === 'none') {
+            loginForm.style.display = 'block';
+            registroForm.style.display = 'none';
+        } else {
+            loginForm.style.display = 'none';
+            registroForm.style.display = 'block';
+        }
+    }
+
+    // Control para mostrar advertencia de admin e info de sistemas
+    document.getElementById('rol').addEventListener('change', function() {
+        const warningDiv = document.getElementById('admin-warning');
+        const sistemasDiv = document.getElementById('sistemas-info');
+        const confirmCheckbox = document.getElementById('confirm-admin');
+        
+        if (this.value === 'admin') {
+            warningDiv.style.display = 'block';
+            sistemasDiv.style.display = 'none';
+            if (confirmCheckbox) {
+                confirmCheckbox.required = true;
+            }
+        } else if (this.value === 'sistemas') {
+            warningDiv.style.display = 'none';
+            sistemasDiv.style.display = 'block';
+            if (confirmCheckbox) {
+                confirmCheckbox.required = false;
+                confirmCheckbox.checked = false;
+            }
+        } else {
+            warningDiv.style.display = 'none';
+            sistemasDiv.style.display = 'none';
+            if (confirmCheckbox) {
+                confirmCheckbox.required = false;
+                confirmCheckbox.checked = false;
+            }
+        }
+    });
+
+    // Validación antes de enviar
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const rol = document.getElementById('rol');
+                const confirmCheckbox = document.getElementById('confirm-admin');
+                
+                if (rol && rol.value === 'admin' && confirmCheckbox && !confirmCheckbox.checked) {
+                    e.preventDefault();
+                    alert('Debes aceptar los términos para rol de administrador');
+                    document.getElementById('admin-warning').scrollIntoView();
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

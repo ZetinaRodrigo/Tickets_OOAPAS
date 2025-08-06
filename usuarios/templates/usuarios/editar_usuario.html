@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico del template -->
+    <link rel="stylesheet" href="{% static 'css/editar_usuario.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link active">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <a href="{% url 'admin_usuarios' %}" class="back-btn">
+                    <i class="bi bi-arrow-left me-2"></i>
+                </a>
+                Editar Usuario
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="form-container">
+                <h2 class="form-header">
+                    <i class="bi bi-person-gear"></i> Editar Usuario
+                </h2>
+                
+                <div class="form-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="nombre" class="form-label">
+                                    Nombre<span class="required-asterisk">*</span>
+                                </label>
+                                <input type="text" name="nombre" id="nombre" class="form-control" value="{{ usuario.nombre }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <label for="apellido" class="form-label">
+                                    Apellido<span class="required-asterisk">*</span>
+                                </label>
+                                <input type="text" name="apellido" id="apellido" class="form-control" value="{{ usuario.apellido }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                Email<span class="required-asterisk">*</span>
+                            </label>
+                            <input type="email" name="email" id="email" class="form-control" value="{{ usuario.email }}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="rol" class="form-label">
+                                Rol<span class="required-asterisk">*</span>
+                            </label>
+                            <select name="rol" id="rol" class="form-select" required>
+                                <option value="usuario" {% if usuario.rol == 'usuario' %}selected{% endif %}>Usuario Normal</option>
+                                <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
+                                <option value="sistemas" {% if usuario.rol == 'sistemas' %}selected{% endif %}>Usuario de Sistemas</option>
+                            </select>
+                            
+                            <!-- Información sobre roles -->
+                            <div class="rol-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Usuario Normal:</strong> Puede crear y gestionar sus propios tickets.<br>
+                                <strong>Administrador:</strong> Acceso completo al sistema, gestión de usuarios y tickets.<br>
+                                <strong>Usuario de Sistemas:</strong> Puede resolver tickets de su área específica.
+                            </div>
+                        </div>
+                        
+                        <div class="categoria-section" id="categoria-sistemas" {% if usuario.rol != 'sistemas' %}style="display: none;"{% endif %}>
+                            <h6><i class="bi bi-gear"></i> Configuración de Sistemas</h6>
+                            <label for="categoria_sistemas" class="form-label">
+                                Categoría de Sistemas<span class="required-asterisk">*</span>
+                            </label>
+                            <select name="categoria_sistemas" id="categoria_sistemas" class="form-select">
+                                <option value="">Selecciona una categoría</option>
+                                <option value="soporte_tecnico" {% if usuario.categoria_sistemas == 'soporte_tecnico' %}selected{% endif %}>Soporte Técnico</option>
+                                <option value="infraestructura" {% if usuario.categoria_sistemas == 'infraestructura' %}selected{% endif %}>Infraestructura</option>
+                                <option value="desarrollo" {% if usuario.categoria_sistemas == 'desarrollo' %}selected{% endif %}>Desarrollo</option>
+                            </select>
+                            <div class="form-text">
+                                Los usuarios de sistemas solo pueden resolver tickets de su categoría asignada.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'admin_usuarios' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i> Actualizar Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/editar_usuario.js' %}"></script>
+</body>
+</html>

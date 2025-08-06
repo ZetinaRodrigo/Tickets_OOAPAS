@@ -1,0 +1,360 @@
+/* Archivo: static/css/visualizar-ticket.css */
+/* IMPORTANTE: Este archivo debe cargarse DESPUÉS de base.css */
+
+/* ===== ESTILOS ESPECÍFICOS PARA VISUALIZAR-TICKET ===== */
+
+/* Variables adicionales específicas */
+:root {
+    --color-verde: #28a745;
+    --color-amarillo: #ffc107;
+    --color-naranja: #fd7e14;
+    --color-rojo: #dc3545;
+}
+
+/* ===== TICKET CONTAINER (similar al form-container pero específico) ===== */
+.ticket-container {
+    background: white;
+    border-radius: 15px;
+    padding: 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.ticket-header {
+    background: var(--color-azul-oscuro);
+    color: white;
+    padding: 25px 30px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ticket-header i {
+    margin-right: 10px;
+}
+
+.ticket-id {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+}
+
+.ticket-body {
+    padding: 30px;
+}
+
+/* ===== SECCIONES DE INFORMACIÓN ESPECÍFICAS ===== */
+.info-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    color: var(--color-azul-oscuro);
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    border-bottom: 2px solid var(--color-azul-claro);
+    padding-bottom: 8px;
+}
+
+.section-title i {
+    margin-right: 10px;
+}
+
+/* ===== STATUS Y BADGES ESPECÍFICOS ===== */
+.status-section {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.status-badge {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    animation: fadeInScale 0.5s ease;
+}
+
+.status-badge i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.status-generado { 
+    background: var(--color-azul-claro); 
+    color: white; 
+}
+
+.status-en_proceso { 
+    background: var(--color-amarillo); 
+    color: #212529; 
+}
+
+.status-en_espera { 
+    background: var(--color-naranja); 
+    color: white; 
+}
+
+.status-cancelado { 
+    background: var(--color-rojo); 
+    color: white; 
+}
+
+.status-finalizado { 
+    background: var(--color-verde); 
+    color: white; 
+}
+
+.urgency-badge {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    animation: fadeInScale 0.6s ease;
+}
+
+.urgency-badge i {
+    margin-right: 8px;
+}
+
+.urgency-1 { 
+    background: white; 
+    color: var(--color-verde); 
+    border: 2px solid var(--color-verde); 
+}
+
+.urgency-2 { 
+    background: white; 
+    color: var(--color-amarillo); 
+    border: 2px solid var(--color-amarillo); 
+}
+
+.urgency-3 { 
+    background: white; 
+    color: var(--color-naranja); 
+    border: 2px solid var(--color-naranja); 
+}
+
+.urgency-4 { 
+    background: white; 
+    color: var(--color-rojo); 
+    border: 2px solid var(--color-rojo); 
+}
+
+.categoria-badge {
+    background: var(--color-gris-oscuro);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    animation: fadeInScale 0.7s ease;
+}
+
+.categoria-badge i {
+    margin-right: 8px;
+}
+
+/* ===== CARDS ESPECÍFICOS ===== */
+.description-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.description-card:hover {
+    border-color: var(--color-azul-claro);
+}
+
+.description-content {
+    color: #495057;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.assignment-card {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid var(--color-amarillo);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.assignment-header {
+    background: var(--color-amarillo);
+    color: #212529;
+    padding: 15px 20px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.assignment-header i {
+    margin-right: 10px;
+}
+
+/* ===== IMÁGENES (hereda de base.css, solo específicos aquí) ===== */
+.images-section {
+    margin-top: 20px;
+}
+
+/* ===== TIMELINE ESPECÍFICO ===== */
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(29, 184, 232, 0.05);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.5s ease;
+}
+
+.timeline-item:hover {
+    background: rgba(29, 184, 232, 0.1);
+    transform: translateX(5px);
+}
+
+.timeline-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--color-azul-claro);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 15px;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.timeline-date {
+    font-size: 13px;
+    color: var(--color-gris-oscuro);
+}
+
+/* ===== MODAL (hereda de base.css, solo override específico) ===== */
+#imageModalImg {
+    max-height: 70vh;
+    cursor: zoom-in;
+    transition: transform 0.3s ease;
+}
+
+#imageModalImg:hover {
+    transform: scale(1.02);
+}
+
+/* ===== ESTADOS SIN DATOS ===== */
+.no-data {
+    text-align: center;
+    color: var(--color-gris-oscuro);
+    font-style: italic;
+    padding: 40px 20px;
+    background: rgba(108, 117, 125, 0.1);
+    border-radius: 10px;
+    border: 2px dashed var(--color-gris-oscuro);
+}
+
+.no-data i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== RESPONSIVE (específico, complementa el del base.css) ===== */
+@media (max-width: 768px) {
+    .status-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .ticket-body {
+        padding: 20px;
+    }
+    
+    .timeline-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .timeline-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}

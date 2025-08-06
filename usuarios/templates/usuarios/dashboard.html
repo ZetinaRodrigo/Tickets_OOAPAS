@@ -1,0 +1,1051 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tickets</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido con todos los templates) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico del dashboard -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            {% if es_admin %}
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="#" class="nav-link active">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        <div class="user-profile">
+            <!-- Avatar con foto o letra -->
+            <div class="user-avatar position-relative">
+                {% if usuario_actual.foto_perfil %}
+                    <img src="{{ usuario_actual.foto_perfil.url }}" alt="Foto de perfil" 
+                        style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">
+                        {{ nombre_completo|first|upper }}
+                    </div>
+                {% endif %}
+                
+                <!-- Botón para cambiar foto -->
+                <div class="position-absolute" style="bottom: -5px; right: -5px;">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light rounded-circle" style="width: 25px; height: 25px; padding: 0;" data-bs-toggle="dropdown">
+                            <i class="bi bi-camera" style="font-size: 12px;"></i>
+                        </button>
+                        <ul class="dropdown-menu" data-placement="profile" data-size="sm">
+                            <li>
+                                <label class="dropdown-item" for="foto-perfil-input" style="cursor: pointer;">
+                                    <i class="bi bi-upload me-2"></i>Subir foto
+                                </label>
+                                <form id="foto-perfil-form" action="{% url 'subir_foto_perfil' %}" method="post" enctype="multipart/form-data" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="file" id="foto-perfil-input" name="foto_perfil" accept="image/*" onchange="document.getElementById('foto-perfil-form').submit();">
+                                </form>
+                            </li>
+                            {% if usuario_actual.foto_perfil %}
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'eliminar_foto_perfil' %}">
+                                    <i class="bi bi-trash me-2"></i>Eliminar foto
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div style="font-weight: 600; margin-bottom: 5px;">{{ nombre_completo }}</div>
+                <div style="font-size: 12px; opacity: 0.8;">Rol: {{ rol|capfirst }}</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 15px;">{{ email }}</div>
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h1 class="page-title">Tickets</h1>
+            <a href="{% url 'crear_ticket' %}" class="btn new-ticket-btn">
+                <i class="bi bi-plus-lg me-2"></i>Nuevo ticket
+            </a>
+        </div>
+        
+        <div class="content-area">
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Layout con pestañas para sistemas y admin -->
+            {% if es_sistemas or es_admin %}
+            <!-- Para sistemas y admin: 3 pestañas -->
+            <div class="tabs-container">
+                <div class="card-header">
+                    <!-- Tab Navigation -->
+                    {% if es_sistemas or es_admin %}
+                        <div class="custom-tabs">
+                            <button class="custom-tab active" data-tab="mis-tickets">
+                                <i class="bi bi-list-task me-2"></i>Tickets
+                            </button>
+                            <button class="custom-tab" data-tab="disponibles">
+                                <i class="bi bi-inbox me-2"></i>Tickets disponibles
+                            </button>
+                            <button class="custom-tab" data-tab="asignados">
+                                <i class="bi bi-person-check me-2"></i>Tickets Asignados
+                            </button>
+                            {% if es_admin %}
+                            <button class="custom-tab" data-tab="todos">
+                                <i class="bi bi-grid me-2"></i>Todos los Tickets
+                            </button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                    <div class="custom-tabs">
+                        <button class="custom-tab active" data-tab="mis-tickets">
+                            <i class="bi bi-list-task me-2"></i>Tickets
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Sección de Filtros -->
+                    <div class="filters-section">
+                        <div class="row g-2 align-items-end">
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-search me-1"></i>Buscar por título
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="search-text" 
+                                       placeholder="Escribe para buscar..." style="border-radius: 6px;">
+                            </div>
+
+                            <!-- Filtro por urgencia -->
+                            <div class="col-md-2">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Urgencia
+                                </label>
+                                <select class="form-select form-select-sm" id="filter-urgency" style="border-radius: 6px;">
+                                    <option value="">Todas</option>
+                                    <option value="1">1 - Baja</option>
+                                    <option value="2">2 - Media</option>
+                                    <option value="3">3 - Alta</option>
+                                    <option value="4">4 - Crítica</option>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por estatus -->
+                            <div class="col-md-2">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-flag me-1"></i>Estatus
+                                </label>
+                                <select class="form-select form-select-sm" id="filter-status" style="border-radius: 6px;">
+                                    <option value="">Todos</option>
+                                    <option value="generado">Generado</option>
+                                    <option value="en_proceso">En Proceso</option>
+                                    <option value="en_espera">En Espera</option>
+                                    <option value="cancelado">Cancelado</option>
+                                    <option value="finalizado">Finalizado</option>
+                                </select>
+                            </div>
+
+                            <!-- Fecha desde -->
+                            <div class="col-md-2">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-calendar me-1"></i>Desde
+                                </label>
+                                <input type="date" class="form-control form-control-sm" id="filter-date-from" style="border-radius: 6px;">
+                            </div>
+
+                            <!-- Fecha hasta -->
+                            <div class="col-md-2">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-calendar-check me-1"></i>Hasta
+                                </label>
+                                <input type="date" class="form-control form-control-sm" id="filter-date-to" style="border-radius: 6px;">
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="col-md-1">
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm px-2" id="clear-filters" 
+                                            style="background: var(--color-gris-oscuro); color: white; border-radius: 6px;" 
+                                            title="Limpiar filtros">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicador de filtros activos -->
+                        {% if tiene_filtros %}
+                        <div id="active-filters" class="mt-2" style="display: block;">
+                            <small class="text-muted">Filtros activos:</small>
+                            <div id="filter-tags" class="d-inline-flex flex-wrap gap-1 ms-2">
+                                {% if filtros_activos.search %}
+                                <span class="filter-tag">
+                                    Búsqueda: "{{ filtros_activos.search }}"
+                                    <button class="remove-filter" onclick="serverFilters.removeFilter('search')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.urgency %}
+                                <span class="filter-tag">
+                                    Urgencia: {% if filtros_activos.urgency == '1' %}Baja{% elif filtros_activos.urgency == '2' %}Media{% elif filtros_activos.urgency == '3' %}Alta{% else %}Crítica{% endif %}
+                                    <button class="remove-filter" onclick="serverFilters.removeFilter('urgency')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.status %}
+                                <span class="filter-tag">
+                                    Estatus: {% if filtros_activos.status == 'generado' %}Generado{% elif filtros_activos.status == 'en_proceso' %}En Proceso{% elif filtros_activos.status == 'en_espera' %}En Espera{% elif filtros_activos.status == 'cancelado' %}Cancelado{% else %}Finalizado{% endif %}
+                                    <button class="remove-filter" onclick="serverFilters.removeFilter('status')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.date_from %}
+                                <span class="filter-tag">
+                                    Desde: {{ filtros_activos.date_from }}
+                                    <button class="remove-filter" onclick="serverFilters.removeFilter('date_from')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.date_to %}
+                                <span class="filter-tag">
+                                    Hasta: {{ filtros_activos.date_to }}
+                                    <button class="remove-filter" onclick="serverFilters.removeFilter('date_to')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div id="active-filters" class="mt-2" style="display: none;">
+                            <small class="text-muted">Filtros activos:</small>
+                            <div id="filter-tags" class="d-inline-flex flex-wrap gap-1 ms-2"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tab-content-area" id="ticketTabsContent">
+                        <!-- Pestaña 1: Mis Tickets -->
+                        <div class="tab-content active" id="mis-tickets">
+                            <div class="table-responsive">
+                                <table class="table custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Fecha</th>
+                                            <th>Urgencia</th>
+                                            <th>Estatus</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in mis_tickets_creados %}
+                                        <tr data-ticket-id="{{ ticket.id }}">
+                                            <td>{{ ticket.titulo }}</td>
+                                            <td>{{ ticket.fecha_creacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                   <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                                        {{ ticket.nivel_urgencia }}
+                                                    </span>
+                                                    {% if es_admin and ticket.estatus != 'finalizado' %}
+                                                    <select class="form-select form-select-sm" style="width: auto; min-width: 80px;" 
+                                                            onchange="cambiarUrgencia({{ ticket.id }}, this)"
+                                                            title="Cambiar urgencia"
+                                                             data-original="{{ ticket.nivel_urgencia }}">
+                                                       <option value="1" {% if ticket.nivel_urgencia == 1 %}selected{% endif %}>1 - Baja</option>
+                                                        <option value="2" {% if ticket.nivel_urgencia == 2 %}selected{% endif %}>2 - Media</option>
+                                                        <option value="3" {% if ticket.nivel_urgencia == 3 %}selected{% endif %}>3 - Alta</option>
+                                                        <option value="4" {% if ticket.nivel_urgencia == 4 %}selected{% endif %}>4 - Crítica</option>
+                                                    </select>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge status-{{ ticket.estatus }}">
+                                                    {% if ticket.estatus == 'generado' %}Generado
+                                                    {% elif ticket.estatus == 'en_proceso' %}En Proceso
+                                                     {% elif ticket.estatus == 'en_espera' %}En Espera  
+                                                    {% elif ticket.estatus == 'cancelado' %}Cancelado
+                                                    {% elif ticket.estatus == 'finalizado' %}Finalizado
+                                                    {% else %}{{ ticket.get_estatus_display }}
+                                                    {% endif %}
+                                                </span>
+                                                    {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}
+                                                        <br><a href="{% url 'ver_motivo_espera' ticket.id %}" class="btn btn-xs btn-outline-info mt-1" style="font-size: 11px; padding: 2px 6px;">Ver Motivo</a>
+                                                    {% endif %}
+                                            </td>
+                                           <td>
+                                                <div class="action-menu">
+                                                    <button class="action-btn" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-mis-tickets">
+                                                        {% if ticket.estatus == 'generado' %}
+                                                        <li><a class="dropdown-item" href="{% url 'editar_ticket' ticket.id %}">
+                                                            <i class="bi bi-pencil me-2"></i>Editar
+                                                        </a></li>
+                                                        <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                        </a></li>
+                                                        {% elif ticket.estatus == 'en_proceso' or ticket.estatus == 'en_espera' %}
+                                                        <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                        </a></li>
+                                                        {% elif ticket.estatus == 'cancelado' %}
+                                                        <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-info-circle me-2"></i>Ver Cancelación
+                                                        </a></li>
+                                                        {% endif %}
+                                                        {% if ticket.estatus == 'finalizado' and ticket.reporte_finalizacion %}
+                                                        <li><a class="dropdown-item" href="{% url 'ver_reporte' ticket.id %}">
+                                                            <i class="bi bi-file-text me-2"></i>Ver Reporte
+                                                        </a></li>
+                                                        {% endif %}
+                                                        <li><a class="dropdown-item" href="{% url 'visualizar_ticket' ticket.id %}">
+                                                            <i class="bi bi-eye me-2"></i>Visualizar
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr class="no-results-row">
+                                            <td colspan="5">No se encontraron tickets</td>
+                                        </tr>
+                                        {% endfor %}
+                                        
+                                        <!-- Mostrar tickets anteriores también -->
+                                        {% for reporte in tickets_anteriores %}
+                                        <tr class="table-light">
+                                            <td>{{ reporte.ticket.titulo }}</td>
+                                            <td>{{ reporte.fecha_creacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <span class="urgency-badge urgency-{{ reporte.ticket.nivel_urgencia }}">
+                                                    {{ reporte.ticket.nivel_urgencia }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge status-finalizado">Finalizado</span>
+                                            </td>
+                                            <td>
+                                                <div class="action-menu">
+                                                    <button class="action-btn" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-mis-tickets">
+                                                        <li><a class="dropdown-item" href="{% url 'ver_reporte' reporte.ticket.id %}">
+                                                            <i class="bi bi-file-text me-2"></i>Ver Reporte
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Paginación para mis tickets -->
+                            {% if mis_tickets_creados.has_other_pages %}
+                            <nav aria-label="Paginación de mis tickets">
+                                <ul class="pagination justify-content-center">
+                                    {% if mis_tickets_creados.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_creados={{ mis_tickets_creados.previous_page_number }}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">&laquo; Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in mis_tickets_creados.paginator.page_range %}
+                                        {% if num == mis_tickets_creados.number %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_creados={{ num }}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if mis_tickets_creados.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_creados={{ mis_tickets_creados.next_page_number }}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">Siguiente &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+
+      <!-- Pestaña 2: Tickets Disponibles -->
+                        <div class="tab-content" id="disponibles">
+                            <div class="table-responsive">
+                                <table class="table custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Creado por</th>
+                                            <th>Fecha</th>
+                                            <th>Urgencia</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in tickets_disponibles %}
+                                        <tr data-ticket-id="{{ ticket.id }}">
+                                            <td>{{ ticket.titulo }}</td>
+                                            <td>{{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</td>
+                                            <td>{{ ticket.fecha_creacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                                        {{ ticket.nivel_urgencia }}
+                                                    </span>
+                                                    {% if es_admin and ticket.estatus != 'finalizado' %}
+                                                    <select class="form-select form-select-sm" style="width: auto; min-width: 80px;" 
+                                                            onchange="cambiarUrgencia({{ ticket.id }}, this)"
+                                                            title="Cambiar urgencia"
+                                                            data-original="{{ ticket.nivel_urgencia }}">
+                                                        <option value="1" {% if ticket.nivel_urgencia == 1 %}selected{% endif %}>1 - Baja</option>
+                                                        <option value="2" {% if ticket.nivel_urgencia == 2 %}selected{% endif %}>2 - Media</option>
+                                                        <option value="3" {% if ticket.nivel_urgencia == 3 %}selected{% endif %}>3 - Alta</option>
+                                                        <option value="4" {% if ticket.nivel_urgencia == 4 %}selected{% endif %}>4 - Crítica</option>
+                                                    </select>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="action-menu">
+                                                    <button class="action-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-disponibles">
+                                                        {% if es_sistemas or es_admin %}
+                                                        <li><a class="dropdown-item" href="#" onclick="aceptarTicket({{ ticket.pk }}, '{{ ticket.titulo|escapejs }}')">
+                                                            <i class="bi bi-check me-2"></i>Aceptar
+                                                        </a></li>
+                                                        {% endif %}
+                                                        
+                                                        {% if es_admin %}
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li class="px-3">
+                                                            <small class="text-muted">Asignar a:</small>
+                                                            <select class="form-select form-select-sm mt-1" onchange="asignarTicket({{ ticket.pk }}, this.value, '{{ ticket.categoria }}')">
+                                                                <option value="">Seleccionar...</option>
+                                                                {% for usuario in usuarios_sistemas %}
+                                                                {% if usuario.categoria_sistemas == ticket.categoria %}
+                                                                    <option value="{{ usuario.id }}">{{ usuario.nombre }} {{ usuario.apellido }}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item text-warning" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                        </a></li>
+                                                        {% endif %}
+                                                        
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item" href="{% url 'visualizar_ticket' ticket.id %}">
+                                                            <i class="bi bi-eye me-2"></i>Visualizar
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr class="no-results-row">
+                                            <td colspan="5">No se encontraron tickets</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Paginación para tickets disponibles -->
+                            {% if tickets_disponibles.has_other_pages %}
+                            <nav aria-label="Paginación de tickets disponibles">
+                                <ul class="pagination justify-content-center">
+                                    {% if tickets_disponibles.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_disponibles={{ tickets_disponibles.previous_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}">&laquo; Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in tickets_disponibles.paginator.page_range %}
+                                        {% if num == tickets_disponibles.number %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_disponibles={{ num }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if tickets_disponibles.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_disponibles={{ tickets_disponibles.next_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}">Siguiente &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+
+                        <!-- Pestaña 3: Tickets Asignados -->
+                        <div class="tab-content" id="asignados">
+                            <div class="table-responsive">
+                                <table class="table custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Creado por</th>
+                                            <th>Fecha</th>
+                                            <th>Urgencia</th>
+                                            <th>Estatus</th>
+                                            <th>Asignación</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in tickets_asignados %}
+                                        <tr data-ticket-id="{{ ticket.id }}">
+                                            <td>{{ ticket.titulo }}</td>
+                                            <td>{{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</td>
+                                            <td>{{ ticket.fecha_creacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                                        {{ ticket.nivel_urgencia }}
+                                                    </span>
+                                                    {% if es_admin and ticket.estatus != 'finalizado' %}
+                                                    <select class="form-select form-select-sm" style="width: auto; min-width: 80px;" 
+                                                            onchange="cambiarUrgencia({{ ticket.id }}, this)"
+                                                            title="Cambiar urgencia"
+                                                            data-original="{{ ticket.nivel_urgencia }}">
+                                                        <option value="1" {% if ticket.nivel_urgencia == 1 %}selected{% endif %}>1 - Baja</option>
+                                                        <option value="2" {% if ticket.nivel_urgencia == 2 %}selected{% endif %}>2 - Media</option>
+                                                        <option value="3" {% if ticket.nivel_urgencia == 3 %}selected{% endif %}>3 - Alta</option>
+                                                        <option value="4" {% if ticket.nivel_urgencia == 4 %}selected{% endif %}>4 - Crítica</option>
+                                                    </select>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                               <span class="status-badge status-{{ ticket.estatus }}">
+                                                    {% if ticket.estatus == 'generado' %}Generado
+                                                    {% elif ticket.estatus == 'en_proceso' %}En Proceso
+                                                     {% elif ticket.estatus == 'en_espera' %}En Espera  
+                                                    {% elif ticket.estatus == 'cancelado' %}Cancelado
+                                                    {% elif ticket.estatus == 'finalizado' %}Finalizado
+                                                    {% else %}{{ ticket.get_estatus_display }}
+                                                    {% endif %}
+                                                </span>
+                                {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}
+                                    <br><a href="{% url 'ver_motivo_espera' ticket.id %}" class="btn btn-xs btn-outline-info mt-1" style="font-size: 11px; padding: 2px 6px;">Ver Motivo</a>
+                                {% endif %}
+                                            </td>
+                                            <td>
+                                                    {% if ticket.asignado_por_admin %}
+                                                        <span class="status-badge assignment-asignado">Asignado</span>
+                                                    {% else %}
+                                                        <span class="status-badge assignment-aceptado">Aceptado</span>
+                                                    {% endif %}
+                                                </td>
+                                            <td>
+                                                <div class="action-menu">
+                                                    <button class="action-btn" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-asignados">
+                                                        {% if ticket.estatus != 'finalizado' and ticket.estatus != 'cancelado' %}
+                                                        <li><a class="dropdown-item" href="{% url 'completar_ticket' ticket.id %}">
+                                                            <i class="bi bi-check-circle me-2"></i>Completar
+                                                        </a></li>
+                                                        <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                        </a></li>
+                                                        {% elif ticket.estatus == 'cancelado' %}
+                                                        <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                            <i class="bi bi-info-circle me-2"></i>Ver Cancelación
+                                                        </a></li>
+                                                        {% endif %}
+                                                        
+                                                        {% if es_admin and not ticket.esta_finalizado %}
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li class="px-3">
+                                                            <small class="text-muted">Cambiar estatus:</small>
+                                                            <select class="form-select form-select-sm mt-1" onchange="cambiarEstatusConValidacion({{ ticket.id }}, this.value)">
+                                                                <option value="">Seleccionar...</option>
+                                                                {% for key, value in opciones_estatus %}
+                                                                    {% if key != ticket.estatus %}
+                                                                        {% if key == 'en_espera' %}
+                                                                            <option value="espera_redirect">{{ value }}</option>
+                                                                        {% elif key == 'finalizado' %}
+                                                                            {% if ticket.reporte_finalizacion %}
+                                                                                <option value="{{ key }}">{{ value }}</option>
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            <option value="{{ key }}">{{ value }}</option>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </li>
+                                                        <li class="px-3 mt-2">
+                                                            <small class="text-muted">Reasignar a:</small>
+                                                            <select class="form-select form-select-sm mt-1" onchange="reasignarTicket({{ ticket.id }}, this.value, '{{ ticket.categoria }}')">
+                                                                <option value="">Seleccionar...</option>
+                                                                {% for usuario in usuarios_sistemas %}
+                                                                    {% if usuario.categoria_sistemas == ticket.categoria or usuario.rol == 'admin' %}
+                                                                        <option value="{{ usuario.id }}">{{ usuario.nombre }} {{ usuario.apellido }}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item text-danger" href="#" onclick="eliminarTicket({{ ticket.id }}, '{{ ticket.titulo }}')">
+                                                            <i class="bi bi-trash me-2"></i>Eliminar
+                                                        </a></li>
+                                                        {% endif %}
+                                                        
+                                                        <li><a class="dropdown-item" href="{% url 'visualizar_ticket' ticket.id %}">
+                                                            <i class="bi bi-eye me-2"></i>Visualizar
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr class="no-results-row">
+                                            <td colspan="7">No se encontraron tickets</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                           <!-- Paginación para tickets asignados -->
+                            {% if tickets_asignados.has_other_pages %}
+                            <nav aria-label="Paginación de tickets asignados">
+                                <ul class="pagination justify-content-center">
+                                    {% if tickets_asignados.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_asignados={{ tickets_asignados.previous_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">&laquo; Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in tickets_asignados.paginator.page_range %}
+                                        {% if num == tickets_asignados.number %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_asignados={{ num }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if tickets_asignados.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_asignados={{ tickets_asignados.next_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">Siguiente &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+
+                    <!-- Pestaña 4: Todos los Tickets (solo admin) -->
+                        {% if es_admin %}
+                        <div class="tab-content" id="todos">
+                            <div class="table-responsive">
+                                <table class="table custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Creado por</th>
+                                            <th>Asignado a</th>
+                                            <th>Fecha</th>
+                                            <th>Urgencia</th>
+                                            <th>Estatus</th>
+                                            <th style="width: 200px;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in todos_los_tickets %}
+                                        <tr data-ticket-id="{{ ticket.id }}">
+                                            <td>{{ ticket.titulo }}</td>
+                                            <td>{{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</td>
+                                            <td>
+                                                {% if ticket.asignado_a %}
+                                                    {{ ticket.asignado_a.nombre }} {{ ticket.asignado_a.apellido }}
+                                                {% else %}
+                                                    <span class="text-muted">Sin asignar</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ ticket.fecha_creacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                                        {{ ticket.nivel_urgencia }}
+                                                    </span>
+                                                    <select class="form-select form-select-sm" style="width: auto; min-width: 80px;" 
+                                                            onchange="cambiarUrgencia({{ ticket.id }}, this)"
+                                                            title="Cambiar urgencia"
+                                                            data-original="{{ ticket.nivel_urgencia }}">
+                                                        <option value="1" {% if ticket.nivel_urgencia == 1 %}selected{% endif %}>1 - Baja</option>
+                                                        <option value="2" {% if ticket.nivel_urgencia == 2 %}selected{% endif %}>2 - Media</option>
+                                                        <option value="3" {% if ticket.nivel_urgencia == 3 %}selected{% endif %}>3 - Alta</option>
+                                                        <option value="4" {% if ticket.nivel_urgencia == 4 %}selected{% endif %}>4 - Crítica</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                               <span class="status-badge status-{{ ticket.estatus }}">
+                                                    {% if ticket.estatus == 'generado' %}Generado
+                                                    {% elif ticket.estatus == 'en_proceso' %}En Proceso
+                                                     {% elif ticket.estatus == 'en_espera' %}En Espera  
+                                                    {% elif ticket.estatus == 'cancelado' %}Cancelado
+                                                    {% elif ticket.estatus == 'finalizado' %}Finalizado
+                                                    {% else %}{{ ticket.get_estatus_display }}
+                                                    {% endif %}
+                                                </span>
+                                                    {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}
+                                                        <br><a href="{% url 'ver_motivo_espera' ticket.id %}" class="btn btn-xs btn-outline-info mt-1" style="font-size: 11px; padding: 2px 6px;">Ver Motivo</a>
+                                                    {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="action-menu">
+                                                    <button class="action-btn" data-bs-toggle="dropdown">
+                                                        <i class="bi bi-three-dots"></i>
+                                                    </button>
+                                                   <ul class="dropdown-menu dropdown-menu-todos">
+                                                        <li class="px-3">
+                                                            <small class="text-muted">Cambiar estatus:</small>
+                                                            <select class="form-select form-select-sm mt-1" onchange="cambiarEstatusConValidacion({{ ticket.id }}, this.value)">
+                                                                <option value="">Seleccionar...</option>
+                                                                {% for key, value in opciones_estatus %}
+                                                                    {% if key != ticket.estatus %}
+                                                                        {% if key == 'en_espera' %}
+                                                                            <option value="espera_redirect">{{ value }}</option>
+                                                                        {% elif key == 'finalizado' %}
+                                                                            {% if ticket.reporte_finalizacion %}
+                                                                                <option value="{{ key }}">{{ value }}</option>
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            <option value="{{ key }}">{{ value }}</option>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </li>
+                                                        <li class="px-3 mt-2">
+                                                            <small class="text-muted">Reasignar a:</small>
+                                                            <select class="form-select form-select-sm mt-1" onchange="reasignarTicket({{ ticket.id }}, this.value, '{{ ticket.categoria }}')">
+                                                                <option value="">Seleccionar...</option>
+                                                                {% for usuario in usuarios_sistemas %}
+                                                                    {% if usuario.categoria_sistemas == ticket.categoria or usuario.rol == 'admin' %}
+                                                                        <option value="{{ usuario.id }}">{{ usuario.nombre }} {{ usuario.apellido }}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item text-danger" href="#" onclick="eliminarTicket({{ ticket.id }}, '{{ ticket.titulo }}')">
+                                                            <i class="bi bi-trash me-2"></i>Eliminar
+                                                        </a></li>
+                                                        <li><a class="dropdown-item" href="{% url 'visualizar_ticket' ticket.id %}">
+                                                            <i class="bi bi-eye me-2"></i>Visualizar
+                                                        </a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr class="no-results-row">
+                                            <td colspan="7">No se encontraron tickets</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Paginación para todos los tickets -->
+                            {% if todos_los_tickets.has_other_pages %}
+                            <nav aria-label="Paginación de todos los tickets">
+                                <ul class="pagination justify-content-center">
+                                    {% if todos_los_tickets.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_todos={{ todos_los_tickets.previous_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">&laquo; Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in todos_los_tickets.paginator.page_range %}
+                                        {% if num == todos_los_tickets.number %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_todos={{ num }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if todos_los_tickets.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_todos={{ todos_los_tickets.next_page_number }}{% if request.GET.page_creados %}&page_creados={{ request.GET.page_creados }}{% endif %}{% if request.GET.page_asignados %}&page_asignados={{ request.GET.page_asignados }}{% endif %}{% if request.GET.page_disponibles %}&page_disponibles={{ request.GET.page_disponibles }}{% endif %}">Siguiente &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Para usuarios normales: con el mismo diseño de pestañas -->
+            <div class="tabs-container">
+                <div class="custom-tabs">
+                    <button class="custom-tab active" data-tab="mis-tickets-normal">
+                        <i class="bi bi-list-task me-2"></i>Tickets
+                    </button>
+                </div>
+                
+                <div class="tab-content-area">
+                    <div class="tab-content active" id="mis-tickets-normal">
+                        <div class="table-responsive">
+                            <table class="table custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Fecha</th>
+                                        <th>Urgencia</th>
+                                        <th>Estatus</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in mis_tickets_creados %}
+                                    <tr>
+                                        <td>{{ ticket.titulo }}</td>
+                                        <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                                {{ ticket.nivel_urgencia }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                           <span class="status-badge status-{{ ticket.estatus }}">
+                                                {% if ticket.estatus == 'generado' %}Generado
+                                                {% elif ticket.estatus == 'en_proceso' %}En Proceso
+                                                 {% elif ticket.estatus == 'en_espera' %}En Espera  
+                                                {% elif ticket.estatus == 'cancelado' %}Cancelado
+                                                {% elif ticket.estatus == 'finalizado' %}Finalizado
+                                                {% else %}{{ ticket.get_estatus_display }}
+                                                {% endif %}
+                                            </span>
+                                        {% if ticket.estatus == 'en_espera' and ticket.motivo_espera %}
+                                            <br><a href="{% url 'ver_motivo_espera' ticket.id %}" class="btn btn-xs btn-outline-info mt-1" style="font-size: 11px; padding: 2px 6px;">Ver Motivo</a>
+                                        {% endif %}                                 
+                                        </td>
+                                        <td>
+                                            <div class="action-menu">
+                                                <button class="action-btn" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    {% if ticket.estatus == 'generado' %}
+                                                    <li><a class="dropdown-item" href="{% url 'editar_ticket' ticket.id %}">
+                                                        <i class="bi bi-pencil me-2"></i>Editar
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                    </a></li>
+                                                    {% elif ticket.estatus == 'en_proceso' or ticket.estatus == 'en_espera' %}
+                                                    <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                                                    </a></li>
+                                                    {% elif ticket.estatus == 'cancelado' %}
+                                                    <li><a class="dropdown-item" href="{% url 'cancelar_ticket' ticket.id %}">
+                                                        <i class="bi bi-info-circle me-2"></i>Ver Cancelación
+                                                    </a></li>
+                                                    {% endif %}
+                                                    {% if ticket.estatus == 'finalizado' and ticket.reporte_finalizacion %}
+                                                    <li><a class="dropdown-item" href="{% url 'ver_reporte' ticket.id %}">
+                                                        <i class="bi bi-file-text me-2"></i>Ver Reporte
+                                                    </a></li>
+                                                    {% endif %}
+                                                    <li><a class="dropdown-item" href="{% url 'visualizar_ticket' ticket.id %}">
+                                                        <i class="bi bi-eye me-2"></i>Visualizar
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr class="no-results-row">
+                                        <td colspan="5">No se encontraron tickets</td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                    <!-- Mostrar tickets anteriores también -->
+                                    {% for reporte in tickets_anteriores %}
+                                    <tr class="table-light">
+                                        <td>{{ reporte.ticket.titulo }}</td>
+                                        <td>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="urgency-badge urgency-{{ reporte.ticket.nivel_urgencia }}">
+                                                {{ reporte.ticket.nivel_urgencia }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-finalizado">Finalizado</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-menu">
+                                                <button class="action-btn" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="{% url 'ver_reporte' reporte.ticket.id %}">
+                                                        <i class="bi bi-file-text me-2"></i>Ver Reporte
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Paginación para usuarios normales -->
+                        {% if mis_tickets_creados.has_other_pages %}
+                        <nav aria-label="Paginación de tickets">
+                            <ul class="pagination justify-content-center">
+                                {% if mis_tickets_creados.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page_creados={{ mis_tickets_creados.previous_page_number }}">&laquo; Anterior</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in mis_tickets_creados.paginator.page_range %}
+                                    {% if num == mis_tickets_creados.number %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_creados={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if mis_tickets_creados.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page_creados={{ mis_tickets_creados.next_page_number }}">Siguiente &raquo;</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar el ticket "<span id="ticketTitulo"></span>"?</p>
+                    <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="{% static 'js/dashboard.js' %}"></script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Ticket</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido con todos los templates) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico de visualizar-ticket -->
+    <link rel="stylesheet" href="{% static 'css/visualizar_ticket.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            {% if es_admin %}
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <a href="{% url 'dashboard' %}" class="back-btn">
+                    <i class="bi bi-arrow-left me-2"></i>
+                </a>
+                Visualizar Ticket
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="ticket-container">
+                <div class="ticket-header">
+                    <div>
+                        <i class="bi bi-eye"></i> {{ ticket.titulo }}
+                    </div>
+                </div>
+                
+                <div class="ticket-body">
+                    <!-- Estado y Badges -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-info-circle"></i> Estado del Ticket
+                        </h5>
+                        <div class="status-section">
+                            <div class="status-badge status-{{ ticket.estatus }}">
+                                <i class="bi bi-{% if ticket.estatus == 'generado' %}plus-circle{% elif ticket.estatus == 'en_proceso' %}gear{% elif ticket.estatus == 'en_espera' %}pause-circle{% elif ticket.estatus == 'cancelado' %}x-circle{% else %}check-circle{% endif %}"></i>
+                                {% if ticket.estatus == 'generado' %}Generado
+                                {% elif ticket.estatus == 'en_proceso' %}En Proceso
+                                {% elif ticket.estatus == 'en_espera' %}En Espera
+                                {% elif ticket.estatus == 'cancelado' %}Cancelado
+                                {% elif ticket.estatus == 'finalizado' %}Finalizado
+                                {% else %}{{ ticket.get_estatus_display }}{% endif %}
+                            </div>
+                            
+                            <div class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                {{ ticket.get_urgencia_display_with_number }}
+                            </div>
+                            
+                            <div class="categoria-badge">
+                                <i class="bi bi-tag"></i>
+                                {{ ticket.get_categoria_display }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información General -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-file-text"></i> Información General
+                        </h5>
+                        <div class="info-card">
+                            <div class="info-row">
+                                <span class="info-label">Creado por:</span>
+                                <span class="info-value">{{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Fecha de creación:</span>
+                                <span class="info-value">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Última modificación:</span>
+                                <span class="info-value">{{ ticket.fecha_edicion|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-chat-text"></i> Descripción
+                        </h5>
+                        <div class="description-card">
+                            <p class="description-content">{{ ticket.descripcion|linebreaksbr }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    {% if ticket.observaciones %}
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-clipboard"></i> Observaciones
+                        </h5>
+                        <div class="description-card">
+                            <p class="description-content">{{ ticket.observaciones|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Timeline -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-clock-history"></i> Historial del Ticket
+                        </h5>
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="bi bi-plus-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Ticket Creado</div>
+                                <div class="timeline-date">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }} por {{ ticket.usuario.nombre }} {{ ticket.usuario.apellido }}</div>
+                            </div>
+                        </div>
+                        
+                        {% if ticket.asignado_a %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="bi bi-person-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Ticket Asignado</div>
+                                <div class="timeline-date">Asignado a {{ ticket.asignado_a.nombre }} {{ ticket.asignado_a.apellido }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if ticket.estatus == 'finalizado' %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Ticket Finalizado</div>
+                                <div class="timeline-date">{{ ticket.fecha_edicion|date:"d/m/Y H:i" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Imágenes -->
+                    {% if ticket.imagenes.all %}
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="bi bi-images"></i> Imágenes del Ticket
+                        </h5>
+                        <div class="images-section">
+                            <div class="row">
+                                {% for imagen in ticket.imagenes.all %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="image-card" onclick="verImagenCompleta('{{ imagen.imagen.url }}', '{{ imagen.nombre_archivo }}')">
+                                        <img src="{{ imagen.imagen.url }}" alt="{{ imagen.nombre_archivo }}">
+                                        <div class="image-card-body">
+                                            <small class="text-muted">{{ imagen.nombre_archivo }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Botón Volver -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver imagen completa -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Imagen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="imageModalImg" src="" class="img-fluid" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript específico -->
+    <script src="{% static 'js/visualizar_ticket.js' %}"></script>
+</body>
+</html>

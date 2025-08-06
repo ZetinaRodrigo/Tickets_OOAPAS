@@ -1,0 +1,213 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ticket</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido con todos los templates) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico de ver-reporte -->
+    <link rel="stylesheet" href="{% static 'css/ver_reporte.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            {% if es_admin %}
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <a href="{% url 'dashboard' %}" class="back-btn">
+                    <i class="bi bi-arrow-left me-2"></i>
+                </a>
+                Reporte de Finalización
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Información del Ticket Original y Reporte -->
+            <div class="report-container">
+                <h2 class="report-header">
+                    <i class="bi bi-file-text"></i> Reporte de Finalización
+                </h2>
+                
+                <div class="report-body">
+                    <div class="row mb-4">
+                        <!-- Ticket Original -->
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card">
+                                <h5><i class="bi bi-ticket-perforated"></i> Ticket Original</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Título:</span>
+                                    <span class="info-value">{{ ticket.titulo }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Descripción:</span>
+                                    <span class="info-value">{{ ticket.descripcion }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Categoría:</span>
+                                    <span class="info-value">
+                                        <span class="categoria-badge">{{ ticket.get_categoria_display }}</span>
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Urgencia:</span>
+                                    <span class="info-value">
+                                        <span class="urgency-badge urgency-{{ ticket.nivel_urgencia }}">
+                                            {{ ticket.get_urgencia_display_with_number }}
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Fecha de creación:</span>
+                                    <span class="info-value">{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                {% if ticket.observaciones %}
+                                <div class="info-row">
+                                    <span class="info-label">Observaciones originales:</span>
+                                    <span class="info-value">{{ ticket.observaciones }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Reporte de finalización -->
+                        <div class="col-md-6 mb-4">
+                            <div class="info-card" style="border-left-color: #28a745; background: rgba(40, 167, 69, 0.1);">
+                                <h5 style="color: #28a745;"><i class="bi bi-check-circle"></i> Reporte de Finalización</h5>
+                                <div class="info-row">
+                                    <span class="info-label">Título del reporte:</span>
+                                    <span class="info-value">{{ reporte.titulo }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Completado por:</span>
+                                    <span class="info-value">{{ reporte.creado_por.nombre }} {{ reporte.creado_por.apellido }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Fecha de finalización:</span>
+                                    <span class="info-value">{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Estatus actual:</span>
+                                    <span class="info-value">
+                                        <span class="status-badge status-finalizado">{{ ticket.get_estatus_display }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles del reporte -->
+                    <div class="detail-card">
+                        <h6><i class="bi bi-clipboard-check"></i> Reporte de Trabajo Realizado</h6>
+                        <div class="detail-content">
+                            {{ reporte.reporte }}
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h6><i class="bi bi-gear"></i> Descripción Técnica</h6>
+                        <div class="detail-content">
+                            {{ reporte.descripcion }}
+                        </div>
+                    </div>
+
+                    {% if reporte.observaciones %}
+                    <div class="detail-card">
+                        <h6><i class="bi bi-chat-text"></i> Observaciones Adicionales</h6>
+                        <div class="detail-content">
+                            {{ reporte.observaciones }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Imágenes del reporte -->
+                    {% if reporte.imagenes.all %}
+                    <div class="detail-card">
+                        <h6><i class="bi bi-images"></i> Imágenes del Reporte</h6>
+                        <div class="row">
+                            {% for imagen in reporte.imagenes.all %}
+                            <div class="col-md-4 mb-3">
+                                <div class="image-card" onclick="verImagenCompleta('{{ imagen.imagen.url }}', '{{ imagen.nombre_archivo }}')">
+                                    <img src="{{ imagen.imagen.url }}" alt="{{ imagen.nombre_archivo }}">
+                                    <div class="image-card-body">
+                                        <small class="text-muted">{{ imagen.nombre_archivo }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-start">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver imagen completa -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Imagen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="imageModalImg" src="" class="img-fluid" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript específico -->
+    <script src="{% static 'js/ver_reporte.js' %}"></script>
+</body>
+</html>

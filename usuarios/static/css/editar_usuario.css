@@ -1,0 +1,56 @@
+/* ==============================================
+   EDITAR_USUARIO.CSS - Solo estilos específicos
+   Depende de: base.css
+   ============================================== */
+
+/* Form Header - Color específico para editar usuario (azul oscuro) */
+.form-header {
+    background: var(--color-azul-oscuro);
+    color: white;
+}
+
+/* Content Area específico para este template */
+.content-area {
+    max-width: 800px;
+}
+
+/* Categoría Section - Específico para usuarios */
+.categoria-section {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.categoria-section.hidden {
+    display: none;
+}
+
+.categoria-section h6 {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.categoria-section h6 i {
+    margin-right: 10px;
+}
+
+/* Rol Info - Card informativa sobre roles */
+.rol-info {
+    background: rgba(29, 184, 232, 0.1);
+    border: 1px solid var(--color-azul-claro);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--color-azul-oscuro);
+}
+
+.rol-info i {
+    margin-right: 8px;
+}

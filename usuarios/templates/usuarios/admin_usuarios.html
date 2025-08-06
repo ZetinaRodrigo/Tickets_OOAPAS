@@ -1,0 +1,398 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Usuarios</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico del template -->
+    <link rel="stylesheet" href="{% static 'css/admin_usuarios.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link active">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                Usuarios
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="users-container">
+                <h2 class="users-header">
+                    <i class="bi bi-people-fill"></i> Usuarios
+                </h2>
+                
+                <div class="users-body">
+                    <!-- Tab Navigation -->
+                    <div class="custom-tabs">
+                        <button class="custom-tab active" data-tab="usuarios">
+                            <i class="bi bi-people me-2"></i>Usuarios
+                        </button>
+                        <button class="custom-tab" data-tab="usuarios-por-admitir">
+                            <i class="bi bi-person-x me-2"></i>Usuarios Por Admitir
+                        </button>
+                    </div>
+                        
+                    <!-- Sección de Filtros para Usuarios -->
+                    <div class="filters-section">
+                        <div class="row g-2 align-items-end">
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-search me-1"></i>Buscar usuario
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="search-user" 
+                                       placeholder="Nombre, apellido o email..." style="border-radius: 6px;">
+                            </div>
+
+                            <!-- Filtro por rol -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-person-badge me-1"></i>Rol
+                                </label>
+                                <select class="form-select form-select-sm" id="filter-rol" style="border-radius: 6px;">
+                                    <option value="">Todos los roles</option>
+                                    {% for rol_key, rol_display in opciones_roles %}
+                                    <option value="{{ rol_key }}">{{ rol_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Filtro por categoría -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size: 11px; font-weight: 600; color: var(--color-azul-oscuro);">
+                                    <i class="bi bi-tags me-1"></i>Categoría
+                                </label>
+                                <select class="form-select form-select-sm" id="filter-categoria" style="border-radius: 6px;">
+                                    <option value="">Todas las categorías</option>
+                                    {% for cat_key, cat_display in opciones_categorias %}
+                                    <option value="{{ cat_key }}">{{ cat_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Botón limpiar -->
+                            <div class="col-md-2">
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm px-3" id="clear-user-filters" 
+                                            style="background: var(--color-gris-oscuro); color: white; border-radius: 6px;" 
+                                            title="Limpiar filtros">
+                                        <i class="bi bi-x-lg me-1"></i>Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicador de filtros activos -->
+                        {% if tiene_filtros %}
+                        <div id="active-user-filters" class="mt-2" style="display: block;">
+                            <small class="text-muted">Filtros activos:</small>
+                            <div id="user-filter-tags" class="d-inline-flex flex-wrap gap-1 ms-2">
+                                {% if filtros_activos.search %}
+                                <span class="filter-tag">
+                                    Búsqueda: "{{ filtros_activos.search }}"
+                                    <button class="remove-filter" onclick="userFilters.removeFilter('search')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.rol %}
+                                <span class="filter-tag">
+                                    Rol: {% if filtros_activos.rol == 'admin' %}Administrador{% elif filtros_activos.rol == 'sistemas' %}Sistemas{% else %}Usuario{% endif %}
+                                    <button class="remove-filter" onclick="userFilters.removeFilter('rol')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                                
+                                {% if filtros_activos.categoria %}
+                                <span class="filter-tag">
+                                    Categoría: {% if filtros_activos.categoria == 'soporte_tecnico' %}Soporte Técnico{% elif filtros_activos.categoria == 'infraestructura' %}Infraestructura{% else %}Desarrollo{% endif %}
+                                    <button class="remove-filter" onclick="userFilters.removeFilter('categoria')">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div id="active-user-filters" class="mt-2" style="display: none;">
+                            <small class="text-muted">Filtros activos:</small>
+                            <div id="user-filter-tags" class="d-inline-flex flex-wrap gap-1 ms-2"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="tab-content-area">
+                        <!-- Pestaña 1: Usuarios Admitidos -->
+                            <div class="tab-content active" id="usuarios">
+                                <div class="table-responsive">
+                                    <table class="table custom-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Usuario</th>
+                                                <th>Email</th>
+                                                <th>Rol</th>
+                                                <th>Categoría</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for usuario in usuarios %}
+                                            <tr>
+                                                <td>{{ usuario.id }}</td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar-table">
+                                                            {{ usuario.nombre|first|upper }}
+                                                        </div>
+                                                        <div>
+                                                            <div class="user-name" title="{{ usuario.nombre }} {{ usuario.apellido }}">
+                                                                {{ usuario.nombre }} {{ usuario.apellido }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ usuario.email }}</td>
+                                                <td>
+                                                    <span class="rol-badge rol-{% if usuario.rol == 'admin' %}admin{% elif usuario.rol == 'sistemas' %}sistemas{% else %}usuario{% endif %}">
+                                                        {% if usuario.rol == 'admin' %}Administrador{% elif usuario.rol == 'sistemas' %}Sistemas{% else %}Usuario{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if usuario.categoria_sistemas %}
+                                                        <span class="categoria-badge">
+                                                            {% if usuario.categoria_sistemas == 'soporte_tecnico' %}Soporte Técnico
+                                                            {% elif usuario.categoria_sistemas == 'infraestructura' %}Infraestructura
+                                                            {% elif usuario.categoria_sistemas == 'desarrollo' %}Desarrollo
+                                                            {% else %}{{ usuario.get_categoria_sistemas_display }}{% endif %}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-primary">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="{% url 'eliminar_usuario' usuario.id %}" class="btn btn-danger">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center">No se encontraron usuarios</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Paginación para Usuarios Admitidos -->
+                                {% if usuarios.has_other_pages %}
+                                <nav aria-label="Paginación de usuarios" class="mt-3">
+                                    <ul class="pagination justify-content-center">
+                                        {% if usuarios.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_admitidos={{ usuarios.previous_page_number }}{% if request.GET.page_por_admitir %}&page_por_admitir={{ request.GET.page_por_admitir }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">&laquo; Anterior</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        {% for num in usuarios.paginator.page_range %}
+                                            {% if num == usuarios.number %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item">
+                                                   <a class="page-link" href="?page_admitidos={{ num }}{% if request.GET.page_por_admitir %}&page_por_admitir={{ request.GET.page_por_admitir }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">{{ num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if usuarios.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_admitidos={{ usuarios.next_page_number }}{% if request.GET.page_por_admitir %}&page_por_admitir={{ request.GET.page_por_admitir }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">Siguiente &raquo;</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                {% endif %}
+                            </div>
+
+                            <!-- Pestaña 2: Usuarios Por Admitir -->
+                            <div class="tab-content" id="usuarios-por-admitir">
+                                <div class="table-responsive">
+                                    <table class="table custom-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Usuario</th>
+                                                <th>Email</th>
+                                                <th>Rol</th>
+                                                <th>Categoría</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for usuario in usuarios_por_admitir %}
+                                            <tr>
+                                                <td>{{ usuario.id }}</td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar-table">
+                                                            {{ usuario.nombre|first|upper }}
+                                                        </div>
+                                                        <div>
+                                                            <div class="user-name" title="{{ usuario.nombre }} {{ usuario.apellido }}">
+                                                                {{ usuario.nombre }} {{ usuario.apellido }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ usuario.email }}</td>
+                                                <td>
+                                                    <span class="rol-badge rol-{% if usuario.rol == 'admin' %}admin{% elif usuario.rol == 'sistemas' %}sistemas{% else %}usuario{% endif %}">
+                                                        {% if usuario.rol == 'admin' %}Administrador{% elif usuario.rol == 'sistemas' %}Sistemas{% else %}Usuario{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if usuario.categoria_sistemas %}
+                                                        <span class="categoria-badge">
+                                                            {% if usuario.categoria_sistemas == 'soporte_tecnico' %}Soporte Técnico
+                                                            {% elif usuario.categoria_sistemas == 'infraestructura' %}Infraestructura
+                                                            {% elif usuario.categoria_sistemas == 'desarrollo' %}Desarrollo
+                                                            {% else %}{{ usuario.get_categoria_sistemas_display }}{% endif %}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="{% url 'aceptar_usuario' usuario.id %}" 
+                                                           class="btn btn-success btn-sm action-btn" 
+                                                           title="Aceptar usuario">
+                                                            <i class="bi bi-check-lg"></i> 
+                                                            <span class="d-none d-lg-inline">Aceptar</span>
+                                                        </a>
+                                                        <a href="{% url 'rechazar_usuario' usuario.id %}" 
+                                                           class="btn btn-danger btn-sm action-btn" 
+                                                           title="Rechazar usuario"
+                                                           onclick="return confirm('¿Estás seguro de que deseas rechazar este usuario? Esta acción eliminará el usuario permanentemente.')">
+                                                            <i class="bi bi-x-lg"></i> 
+                                                            <span class="d-none d-lg-inline">Rechazar</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center">No se encontraron usuarios por admitir</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Paginación para Usuarios Por Admitir -->
+                                {% if usuarios_por_admitir.has_other_pages %}
+                                <nav aria-label="Paginación de usuarios por admitir" class="mt-3">
+                                    <ul class="pagination justify-content-center">
+                                        {% if usuarios_por_admitir.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_por_admitir={{ usuarios_por_admitir.previous_page_number }}{% if request.GET.page_admitidos %}&page_admitidos={{ request.GET.page_admitidos }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">&laquo; Anterior</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        {% for num in usuarios_por_admitir.paginator.page_range %}
+                                            {% if num == usuarios_por_admitir.number %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page_por_admitir={{ num }}{% if request.GET.page_admitidos %}&page_admitidos={{ request.GET.page_admitidos }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">{{ num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if usuarios_por_admitir.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page_por_admitir={{ usuarios_por_admitir.next_page_number }}{% if request.GET.page_admitidos %}&page_admitidos={{ request.GET.page_admitidos }}{% endif %}{% if filtros_activos.search %}&search={{ filtros_activos.search }}{% endif %}{% if filtros_activos.rol %}&rol={{ filtros_activos.rol }}{% endif %}{% if filtros_activos.categoria %}&categoria={{ filtros_activos.categoria }}{% endif %}">Siguiente &raquo;</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                {% endif %}
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/admin_usuarios.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Ticket</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Base CSS (compartido) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- CSS específico del template -->
+    <link rel="stylesheet" href="{% static 'css/crear_ticket.css' %}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.png' %}" alt="OOAPAS" class="logo-img">
+        </div>
+        
+        <div class="nav-menu">
+            {% if es_admin %}
+            <div class="nav-item">
+                <a href="{% url 'admin_usuarios' %}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    Usuarios
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Tickets
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="{% url 'crear_ticket' %}" class="nav-link active">
+                    <i class="bi bi-plus-circle"></i>
+                    Generar ticket
+                </a>
+            </div>
+        </div>
+        
+        {% include 'usuarios/user_profile.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="page-title">
+                <a href="{% url 'dashboard' %}" class="back-btn">
+                    <i class="bi bi-arrow-left me-2"></i>
+                </a>
+                Generar ticket
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="form-container">
+                <h2 class="form-header">Crear Nuevo Ticket</h2>
+                
+                <div class="form-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="titulo" class="form-label">
+                                Título<span class="required-asterisk">*</span>
+                            </label>
+                            <input type="text" name="titulo" id="titulo" class="form-control" placeholder="Título del ticket..." required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="categoria" class="form-label">
+                                    Categoría<span class="required-asterisk">*</span>
+                                </label>
+                                <select name="categoria" id="categoria" class="form-select" required>
+                                    <option value="">Selecciona una categoría</option>
+                                    <option value="soporte_tecnico">Soporte Técnico</option>
+                                    <option value="infraestructura">Infraestructura</option>
+                                    <option value="desarrollo">Desarrollo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <label for="nivel_urgencia" class="form-label">
+                                    Urgencia<span class="required-asterisk">*</span>
+                                </label>
+                                <select name="nivel_urgencia" id="nivel_urgencia" class="form-select" required>
+                                    <option value="1">1 - Baja</option>
+                                    <option value="2" selected>2 - Media</option>
+                                    <option value="3">3 - Alta</option>
+                                    <option value="4">4 - Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="descripcion" class="form-label">
+                                Descripción<span class="required-asterisk">*</span>
+                            </label>
+                            <textarea name="descripcion" id="descripcion" class="form-control" rows="4" placeholder="Descripción del problema..." required></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="observaciones" class="form-label">Observaciones (opcional)</label>
+                            <textarea name="observaciones" id="observaciones" class="form-control" rows="3" placeholder="Escriba aquí sus observaciones..."></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="imagenes" class="form-label">Imágenes (opcional)</label>
+                            <input type="file" name="imagenes" id="imagenes" class="form-control" multiple accept="image/*">
+                            <div class="form-text">Solo se permiten archivos de imagen (JPG,PNG,GIF, etc.). Puedes subir múltiples imágenes (opcional)</div>
+                            
+                            <!-- Preview de las imágenes seleccionadas -->
+                            <div id="image-preview" class="image-preview-container"></div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Generar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/crear_ticket.js' %}"></script>
+</body>
+</html>
