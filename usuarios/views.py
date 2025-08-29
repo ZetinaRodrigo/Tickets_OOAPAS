@@ -28,18 +28,25 @@ def list_usuarios(request):
             
         if nombre and apellido and email and password:
             try:
-                # Crear usuario con contraseña (sin admitir)
+                # Verificar si es el primer admin del sistema
+                es_primer_admin = (rol == 'admin' and not Usuario.objects.filter(rol='admin', admitido=True).exists())
+                
+                # Crear usuario
                 usuario = Usuario.objects.create(
                     nombre=nombre,
                     apellido=apellido,
                     email=email,
                     rol=rol,
-                    admitido=False  # Asegurar que no esté admitido
+                    admitido=es_primer_admin  # Si es primer admin, se admite automáticamente
                 )
-                usuario.set_password(password)  # Hashear la contraseña
+                usuario.set_password(password)
                 usuario.save()
                 
-                messages.success(request, 'Cuenta creada exitosamente. Por favor espere a que su cuenta sea validada por un administrador.')
+                if es_primer_admin:
+                    messages.success(request, 'Primer administrador creado exitosamente. Ya puedes iniciar sesión.')
+                else:
+                    messages.success(request, 'Cuenta creada exitosamente. Por favor espere a que su cuenta sea validada por un administrador.')
+                
                 return render(request, 'usuarios/list_usuarios.html')
             except Exception as e:
                 messages.error(request, f'Error: {str(e)}')
